@@ -1,0 +1,28 @@
+.terraform/
+
+*.tfstate
+*.tfstate.*
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+crash.log
+*.usage.json
+
+.env
+.direnv/
+
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate.d/
+*.tfstate
+*.tfstate.backup
+
+secret.auto.tfvars
+*.auto.tfvars
+kubeconfig.yaml
+
+# variáveis sensíveis ficam apenas no secret.auto.tfvars (ignorado pelo git)
+# terraform.tfvars contém apenas configurações não-sensíveis
