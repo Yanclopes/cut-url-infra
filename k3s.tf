@@ -79,7 +79,6 @@ resource "aws_autoscaling_group" "k3s_workers" {
 
   target_group_arns = [
     aws_lb_target_group.backend.arn,
-    aws_lb_target_group.frontend.arn,
   ]
 
   launch_template {

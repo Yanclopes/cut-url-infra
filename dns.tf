@@ -8,12 +8,13 @@ resource "cloudflare_record" "api" {
   ttl     = 1
 }
 
-# --- DNS Frontend → ALB Frontend ---
+# --- DNS Frontend → CloudFront ---
+# proxied=false: CloudFront exige que o Host header chegue sem reescrita do Cloudflare
 resource "cloudflare_record" "frontend" {
   zone_id = var.cloudflare_zone_id
   name    = local.front_domain
-  content = aws_lb.frontend.dns_name
+  content = aws_cloudfront_distribution.frontend.domain_name
   type    = "CNAME"
-  proxied = true
-  ttl     = 1
+  proxied = false
+  ttl     = 60
 }

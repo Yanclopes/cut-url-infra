@@ -129,12 +129,19 @@ resource "aws_iam_role_policy" "github_frontend" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-        ]
-        Resource = "arn:aws:ssm:us-east-1:*:parameter/${local.env}/*"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject", "s3:GetObject"]
+        Resource = "${aws_s3_bucket.frontend.arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.frontend.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cloudfront:CreateInvalidation"]
+        Resource = "arn:aws:cloudfront::*:distribution/${aws_cloudfront_distribution.frontend.id}"
       }
     ]
   })
