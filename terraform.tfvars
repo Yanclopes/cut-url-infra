@@ -6,5 +6,5 @@ private_subnet_b_cidr = "10.0.11.0/24"
 
 master_instance_type = "t3.small"
 worker_instance_type = "t3.micro"
-worker_count         = 1
-worker_max_count     = 2
+worker_count         = 2
+worker_max_count     = 3

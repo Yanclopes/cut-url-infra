@@ -31,6 +31,11 @@ resource "aws_instance" "k3s_master" {
     region    = "us-east-1"
   }))
 
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+
   tags = merge(local.common_tags, {
     Name = "k3s-master-${local.env}"
     Role = "master"
@@ -55,6 +60,14 @@ resource "aws_launch_template" "k3s_worker" {
     name = aws_iam_instance_profile.k3s.name
   }
 
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 20
+      volume_type = "gp3"
+    }
+  }
+
   user_data = base64encode(templatefile("${path.module}/scripts/k3s-worker.sh.tpl", {
     workspace         = local.env
     region            = "us-east-1"
@@ -73,7 +86,7 @@ resource "aws_launch_template" "k3s_worker" {
 resource "aws_autoscaling_group" "k3s_workers" {
   name                = "k3s-workers-${local.env}"
   desired_capacity    = var.worker_count
-  min_size            = 1
+  min_size            = 2
   max_size            = var.worker_max_count
   vpc_zone_identifier = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
