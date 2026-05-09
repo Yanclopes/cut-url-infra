@@ -6,19 +6,26 @@ REGION="${region}"
 WORKSPACE="${workspace}"
 
 echo "[1/5] Instalando dependências..."
-dnf install -y jq aws-cli curl
+# aws CLI v2 vem pré-instalado no AL2023 — instalar apenas jq
+dnf install -y jq
 
 echo "[2/5] Instalando K3s server..."
-PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+# IMDSv2: obter IP público com token de sessão
+IMDS_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" \
+  http://169.254.169.254/latest/meta-data/public-ipv4)
+
+echo "IP público: $PUBLIC_IP"
 
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --tls-san $PUBLIC_IP \
   --disable traefik \
   --write-kubeconfig-mode 644" sh -
 
-# Aguarda API server subir
 echo "[3/5] Aguardando K3s ficar pronto..."
 until kubectl get nodes --kubeconfig /etc/rancher/k3s/k3s.yaml &>/dev/null; do
+  echo "  aguardando API server..."
   sleep 5
 done
 echo "K3s pronto."
@@ -43,4 +50,4 @@ aws ssm put-parameter \
 echo "[5/5] Criando namespace padrão..."
 kubectl create namespace cut-url --kubeconfig /etc/rancher/k3s/k3s.yaml || true
 
-echo "Bootstrap do K3s master concluído!"
+echo "Bootstrap do K3s master concluído com sucesso!"

@@ -23,7 +23,7 @@ resource "aws_instance" "k3s_master" {
   instance_type          = var.master_instance_type
   subnet_id              = aws_subnet.public_a.id
   vpc_security_group_ids = [aws_security_group.k3s.id]
-  key_name               = var.ec2_key_name
+  key_name               = var.ec2_key_name != "" ? var.ec2_key_name : null
   iam_instance_profile   = aws_iam_instance_profile.k3s.name
 
   user_data = base64encode(templatefile("${path.module}/scripts/k3s-master.sh.tpl", {
@@ -47,7 +47,7 @@ resource "aws_launch_template" "k3s_worker" {
   name_prefix   = "k3s-worker-${local.env}-"
   image_id      = data.aws_ami.al2023.id
   instance_type = var.worker_instance_type
-  key_name      = var.ec2_key_name
+  key_name      = var.ec2_key_name != "" ? var.ec2_key_name : null
 
   vpc_security_group_ids = [aws_security_group.k3s.id]
 
